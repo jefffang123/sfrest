@@ -19,8 +19,8 @@ public class SFRestClientTest {
     public static void init() {
         UserPassTokenProvider tokenProvider = new UserPassTokenProvider();
         tokenProvider.setEnvironment(PRODUCTION);
-        tokenProvider.setClientId("3MVG9Y6d_Btp4xp5Xqs8.5xmFm3VA07if7aNwNVGSTJKykCnteeXP5TJNA2p4aEPDgEyzeFPHql_S7eQS7IGv");
-        tokenProvider.setClientSecret("6635916227264595120");
+        tokenProvider.setClientId("3MVG9Y6d_Btp4xp5Xqs8.5xmFm2lAaZDOz2aeLy6mH.p6RXoshrl1SMWhsDoF10Fwi.cVo92zI.RKQguP0bUc");
+        tokenProvider.setClientSecret("781889688054271860");
         tokenProvider.setUsername("sanlyfang@gmail.com");
         tokenProvider.setPassword("test1234");
         tokenProvider.setSecurityToken("9hCzimEBARhsnCxhKpeqdaQBX");
