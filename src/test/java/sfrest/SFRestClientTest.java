@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
-import static sfrest.Environment.PRODUCTION;
 
 public class SFRestClientTest {
 
@@ -17,14 +16,7 @@ public class SFRestClientTest {
 
     @BeforeClass
     public static void init() {
-        UserPassTokenProvider tokenProvider = new UserPassTokenProvider();
-        tokenProvider.setEnvironment(PRODUCTION);
-        tokenProvider.setClientId("3MVG9Y6d_Btp4xp5Xqs8.5xmFm2lAaZDOz2aeLy6mH.p6RXoshrl1SMWhsDoF10Fwi.cVo92zI.RKQguP0bUc");
-        tokenProvider.setClientSecret("781889688054271860");
-        tokenProvider.setUsername("sanlyfang@gmail.com");
-        tokenProvider.setPassword("test1234");
-        tokenProvider.setSecurityToken("9hCzimEBARhsnCxhKpeqdaQBX");
-        restClient = new SFRestClient(tokenProvider);
+        restClient = new SFRestClient(new TestTokenProvider());
     }
 
     @AfterClass

@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.*;
-import static sfrest.Environment.PRODUCTION;
 import static sfrest.SFExceptionMatcher.*;
 
 public class UserPassTokenProviderTest {
@@ -19,13 +18,7 @@ public class UserPassTokenProviderTest {
 
     @Before
     public void init() {
-        tokenProvider = new UserPassTokenProvider();
-        tokenProvider.setEnvironment(PRODUCTION);
-        tokenProvider.setClientId("3MVG9Y6d_Btp4xp5Xqs8.5xmFm2lAaZDOz2aeLy6mH.p6RXoshrl1SMWhsDoF10Fwi.cVo92zI.RKQguP0bUc");
-        tokenProvider.setClientSecret("781889688054271860");
-        tokenProvider.setUsername("sanlyfang@gmail.com");
-        tokenProvider.setPassword("test1234");
-        tokenProvider.setSecurityToken("9hCzimEBARhsnCxhKpeqdaQBX");
+        tokenProvider = new TestTokenProvider();
     }
 
     @After
