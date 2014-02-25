@@ -8,7 +8,6 @@ import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.*;
 import static sfrest.Environment.PRODUCTION;
-import static sfrest.Environment.SANDBOX;
 import static sfrest.SFExceptionMatcher.*;
 
 public class UserPassTokenProviderTest {
@@ -32,19 +31,6 @@ public class UserPassTokenProviderTest {
     @After
     public void clean() {
         tokenProvider = null;
-    }
-
-    @Test
-    public void testURIs() {
-        tokenProvider.setEnvironment(PRODUCTION);
-        assertEquals("https://login.salesforce.com/services/oauth2/authorize", PRODUCTION.getAuthURI().toString());
-        assertEquals("https://login.salesforce.com/services/oauth2/token", PRODUCTION.getTokenURI().toString());
-        assertEquals("https://login.salesforce.com/services/oauth2/revoke", PRODUCTION.getRevokeTokenURI().toString());
-
-        tokenProvider.setEnvironment(SANDBOX);
-        assertEquals("https://test.salesforce.com/services/oauth2/authorize", SANDBOX.getAuthURI().toString());
-        assertEquals("https://test.salesforce.com/services/oauth2/token", SANDBOX.getTokenURI().toString());
-        assertEquals("https://test.salesforce.com/services/oauth2/revoke", SANDBOX.getRevokeTokenURI().toString());
     }
 
     @Test
