@@ -17,6 +17,11 @@ import java.net.URISyntaxException;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+/**
+ * This controller implements requesting authorization code step of the <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/intro_understanding_web_server_oauth_flow.htm">Web server OAuth Authentication Flow</a>.
+ *
+ * @see WebAuthTokenProvider
+ */
 @Controller
 @RequestMapping("/sf-login")
 public class WebAuthController {

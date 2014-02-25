@@ -49,8 +49,17 @@ public abstract class AbstractTokenProvider implements TokenProvider {
         return token.getRefreshToken() != null;
     }
 
+    /**
+     * When access token get timed out, can use this method to get a new access token.
+     * <p>
+     * This only works for web server OAuth authentication flow and user-agent flow, not for username-password OAuth authentication flow.
+     * </p>
+     *
+     * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/intro_understanding_refresh_token_oauth.htm">Understanding the OAuth Refresh Token Process</a>
+     */
     @Override
     public void refreshToken(Token token) {
+        // TODO:
         throw new UnsupportedOperationException();
     }
 

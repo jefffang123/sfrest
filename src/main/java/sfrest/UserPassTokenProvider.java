@@ -3,6 +3,9 @@ package sfrest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+/**
+ * Implementation of <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/intro_understanding_username_password_oauth_flow.htm">Username-Password OAuth Authentication Flow</a>.
+ */
 public class UserPassTokenProvider extends AbstractTokenProvider {
 
     private String username;

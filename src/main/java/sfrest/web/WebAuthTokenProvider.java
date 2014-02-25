@@ -10,6 +10,11 @@ import sfrest.AbstractTokenProvider;
 import sfrest.SFRestTemplate;
 import sfrest.Token;
 
+/**
+ * This class implements requesting access token step of the <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/intro_understanding_web_server_oauth_flow.htm">Web server OAuth Authentication Flow</a>.
+ *
+ * @see WebAuthController
+ */
 @Component
 public class WebAuthTokenProvider extends AbstractTokenProvider {
 
