@@ -79,10 +79,4 @@ public class UserPassTokenProviderTest {
         tokenProvider.setSecurityToken("");
         tokenProvider.requestToken();
     }
-
-    @Test
-    public void testRevokeToken() {
-        Token token = tokenProvider.requestToken();
-        tokenProvider.revokeToken(token);
-    }
 }

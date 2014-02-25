@@ -1,21 +1,12 @@
 package sfrest;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Value;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 public abstract class AbstractTokenProvider implements TokenProvider {
 
     protected Environment environment;
     protected String clientId;
-    protected String clientSecret;
+    protected String clientSecret; // Not used for User-Agent OAuth Authentication Flow.
 
     @Override
     public Environment getEnvironment() {
@@ -49,14 +40,6 @@ public abstract class AbstractTokenProvider implements TokenProvider {
         return token.getRefreshToken() != null;
     }
 
-    /**
-     * When access token get timed out, can use this method to get a new access token.
-     * <p>
-     * This only works for web server OAuth authentication flow and user-agent flow, not for username-password OAuth authentication flow.
-     * </p>
-     *
-     * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/intro_understanding_refresh_token_oauth.htm">Understanding the OAuth Refresh Token Process</a>
-     */
     @Override
     public void refreshToken(Token token) {
         // TODO:
@@ -64,19 +47,7 @@ public abstract class AbstractTokenProvider implements TokenProvider {
     }
 
     @Override
-    public void revokeToken(Token token) {
-        HttpClient client = new DefaultHttpClient();
-        URIBuilder builder = new URIBuilder(environment.getRevokeTokenURI());
-        builder.addParameter("token", token.getAccessToken());
-
-        try {
-            HttpGet get = new HttpGet(builder.build());
-            HttpResponse response = client.execute(get);
-            EntityUtils.consume(response.getEntity());
-        } catch (URISyntaxException | IOException e) {
-            throw new SFException("Revoke Token failed", e);
-        } finally {
-            client.getConnectionManager().shutdown();
-        }
+    public void revokeToken(Token token, boolean includingRefreshToken) {
+        // TODO:
     }
 }
