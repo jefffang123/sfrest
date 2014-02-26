@@ -4,19 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-public class SFRestClient implements DisposableBean {
+public class SFRestClient {
 
     private static final Logger logger = LoggerFactory.getLogger(SFRestClient.class);
 
@@ -46,16 +43,22 @@ public class SFRestClient implements DisposableBean {
         return tokenStorage;
     }
 
+    public SFRestTemplate getRestTemplate() {
+        return template;
+    }
+
     public SFRestClient(UserPassTokenProvider systemTokenProvider) {
         this(systemTokenProvider, new DefaultTokenStorage());
     }
 
     public SFRestClient(TokenProvider tokenProvider, TokenStorage tokenStorage) {
+        this(tokenProvider, tokenStorage, new SFRestTemplate());
+    }
+
+    public SFRestClient(TokenProvider tokenProvider, TokenStorage tokenStorage, SFRestTemplate template) {
         this.tokenProvider = tokenProvider;
         this.tokenStorage = tokenStorage;
-
-        template = new SFRestTemplate(new SFRequestFactory());
-        template.setErrorFieldMapping("errorCode", "message");
+        this.template = template;
     }
 
     public Environment getEnvironment() {
@@ -153,47 +156,32 @@ public class SFRestClient implements DisposableBean {
         return qResult;
     }
 
-    @Override
-    public void destroy() throws Exception {
-        ((SFRequestFactory) template.getRequestFactory()).destroy();
-    }
-
     private <T> T execute(String uri, HttpMethod method, Object requestBody, ParameterizedTypeReference<T> responseType, Object... uriVariables) {
-        HttpEntity<?> body = requestBody != null ? new HttpEntity<>(requestBody) : HttpEntity.EMPTY;
+        Token token = tokenStorage.getToken();
+        if (token == null) {
+            logger.debug("Token not found, requesting new token...");
+            token = tokenProvider.requestToken();
+            logger.debug("Got token: {}", token);
+
+            tokenStorage.saveToken(token);
+            logger.debug("Token saved successfully");
+        }
+
+        if (!uri.startsWith("http")) {
+            uri = token.getInstanceUrl() + (uri.startsWith("/") ? "" : "/") + uri;
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token.getAccessToken());
+        headers.add("Content-Type", "application/json;charset=UTF-8");
 
         try {
-            return template.exchange(uri, method, body, responseType, uriVariables).getBody();
+            return template.exchange(uri, method, new HttpEntity<>(requestBody, headers), responseType, uriVariables).getBody();
         } catch (TokenException e) {
             tokenStorage.clearToken();
             logger.debug("Invalid token cleared successfully");
 
             throw e;
-        }
-    }
-
-    private class SFRequestFactory extends HttpComponentsClientHttpRequestFactory {
-
-        @Override
-        public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-            Token token = tokenStorage.getToken();
-            if (token == null) {
-                logger.debug("Token not found, requesting new token...");
-                token = tokenProvider.requestToken();
-                logger.debug("Got token: {}", token);
-
-                tokenStorage.saveToken(token);
-                logger.debug("Token saved successfully");
-            }
-
-            if (!uri.isAbsolute()) {
-                uri = URI.create(token.getInstanceUrl() + "/").resolve(uri);
-            }
-
-            ClientHttpRequest request = super.createRequest(uri, httpMethod);
-            request.getHeaders().add("Authorization", "Bearer " + token.getAccessToken());
-            request.getHeaders().add("Content-Type", "application/json;charset=UTF-8");
-
-            return request;
         }
     }
 

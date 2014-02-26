@@ -1,7 +1,5 @@
 package sfrest;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
 
@@ -12,17 +10,7 @@ import static org.junit.Assert.*;
 
 public class SFRestClientTest {
 
-    private static SFRestClient restClient;
-
-    @BeforeClass
-    public static void init() {
-        restClient = new SFRestClient(new TestTokenProvider());
-    }
-
-    @AfterClass
-    public static void clean() throws Exception {
-        restClient.destroy();
-    }
+    private SFRestClient restClient = new SFRestClient(new TestTokenProvider());
 
     @Test
     public void testGetList() {

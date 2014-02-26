@@ -39,7 +39,6 @@ public class UserPassTokenProvider extends AbstractTokenProvider {
     @Override
     public Token requestToken() {
         SFRestTemplate rt = new SFRestTemplate();
-        rt.setErrorFieldMapping("error", "error_description");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "password");
         params.add("client_id", clientId);

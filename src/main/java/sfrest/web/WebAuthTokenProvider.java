@@ -39,7 +39,6 @@ public class WebAuthTokenProvider extends AbstractTokenProvider {
         }
 
         SFRestTemplate rt = new SFRestTemplate();
-        rt.setErrorFieldMapping("error", "error_description");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", clientId);

@@ -2,8 +2,6 @@ package sfrest;
 
 public class SFException extends RuntimeException {
 
-    private static final long serialVersionUID = 3372682141423664778L;
-
     private String errorCode;
     private String response;
 
