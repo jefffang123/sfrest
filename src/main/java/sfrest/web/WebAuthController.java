@@ -1,6 +1,5 @@
 package sfrest.web;
 
-import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,11 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponentsBuilder;
 import sfrest.Environment;
 import sfrest.Token;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URISyntaxException;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -30,8 +29,7 @@ public class WebAuthController {
 
     private String postLoginUri;
     private boolean localEnabled;
-    private WebAuthTokenProvider tokenProvider;
-    private SessionTokenStorage tokenStorage;
+    private WebAuthRestClient client;
 
     @Value("${sfrest.postLogin.uri}")
     public void setPostLoginUri(String postLoginUri) {
@@ -44,13 +42,8 @@ public class WebAuthController {
     }
 
     @Autowired
-    public void setTokenProvider(WebAuthTokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
-    }
-
-    @Autowired
-    public void setTokenStorage(SessionTokenStorage tokenStorage) {
-        this.tokenStorage = tokenStorage;
+    public void setRestClient(WebAuthRestClient client) {
+        this.client = client;
     }
 
     @RequestMapping(method = POST)
@@ -58,23 +51,24 @@ public class WebAuthController {
         logger.debug("Login request received, env: '{}', state: '{}'", env);
 
         Environment sfEnv = Environment.byName(env);
+        WebAuthTokenProvider tokenProvider = getTokenProvider();
         tokenProvider.setEnvironment(sfEnv);
 
-        URIBuilder ub = new URIBuilder(sfEnv.getAuthURI());
-        ub.addParameter("response_type", "code");
-        ub.addParameter("client_id", tokenProvider.getClientId());
-        ub.addParameter("redirect_uri", tokenProvider.getRedirectUri());
-        ub.addParameter("display", "popup");
+        UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromUri(sfEnv.getAuthURI())
+                .queryParam("response_type", "code")
+                .queryParam("client_id", tokenProvider.getClientId())
+                .queryParam("redirect_uri", tokenProvider.getRedirectUri())
+                .queryParam("display", "popup");
 
         // TODO: Support client provided UI state.
         if (localEnabled) {
             String url = request.getRequestURL().toString();
             if (!url.equals(tokenProvider.getRedirectUri())) {
-                ub.addParameter("state", url);
+                urlBuilder.queryParam("state", url);
             }
         }
 
-        return "redirect:" + ub.toString();
+        return "redirect:" + urlBuilder.build(true).toUriString();
     }
 
     @RequestMapping(method = GET)
@@ -82,20 +76,18 @@ public class WebAuthController {
         logger.debug("Login callback received, code: '{}', state: '{}'", code, state);
 
         if (localEnabled && state != null) {
-            try {
-                URIBuilder ub = new URIBuilder(state);
-                ub.addParameter("code", code);
-
-                return "redirect:" + ub.toString();
-            } catch (URISyntaxException e) {
-                logger.error("Invalid URI: {}", state);
-            }
+            UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromHttpUrl(state).queryParam("code", code);
+            return "redirect:" + urlBuilder.build(true).toUriString();
         }
 
         request.setAttribute(WebAuthTokenProvider.SF_AUTH_CODE_KEY, code);
-        Token token = tokenProvider.requestToken();
-        tokenStorage.saveToken(token);
+        Token token = getTokenProvider().requestToken(client.getRestTemplate());
+        client.getTokenStorage().saveToken(token);
 
         return "redirect:" + postLoginUri;
+    }
+
+    private WebAuthTokenProvider getTokenProvider() {
+        return (WebAuthTokenProvider) client.getTokenProvider();
     }
 }

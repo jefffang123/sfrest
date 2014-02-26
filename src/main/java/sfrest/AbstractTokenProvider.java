@@ -1,6 +1,7 @@
 package sfrest;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
 
 public abstract class AbstractTokenProvider implements TokenProvider {
 
@@ -41,13 +42,13 @@ public abstract class AbstractTokenProvider implements TokenProvider {
     }
 
     @Override
-    public void refreshToken(Token token) {
+    public void refreshToken(RestTemplate template, Token token) {
         // TODO:
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void revokeToken(Token token, boolean includingRefreshToken) {
+    public void revokeToken(RestTemplate template, Token token, boolean includingRefreshToken) {
         // TODO:
     }
 }

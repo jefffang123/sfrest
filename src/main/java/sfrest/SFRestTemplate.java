@@ -1,11 +1,9 @@
 package sfrest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.DefaultResponseErrorHandler;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -17,18 +15,10 @@ import java.util.Map;
 /**
  * A <code>RestTemplate</code> that knows how to translate salesforce errors into corresponding Exceptions.
  */
-public class SFRestTemplate extends RestTemplate {
+class SFRestTemplate extends RestTemplate {
 
-    private static final ResponseErrorHandler SF_ERROR_HANDLER = new SFResponseErrorHandler();
-
-    public SFRestTemplate() {
-        setErrorHandler(SF_ERROR_HANDLER);
-    }
-
-    public SFRestTemplate(ClientHttpRequestFactory requestFactory) {
-        super(requestFactory);
-
-        setErrorHandler(SF_ERROR_HANDLER);
+    SFRestTemplate() {
+        setErrorHandler(new SFResponseErrorHandler());
     }
 
     private static class SFResponseErrorHandler extends DefaultResponseErrorHandler {

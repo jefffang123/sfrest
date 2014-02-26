@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import sfrest.AbstractTokenProvider;
-import sfrest.SFRestTemplate;
 import sfrest.Token;
 
 /**
@@ -32,13 +32,12 @@ public class WebAuthTokenProvider extends AbstractTokenProvider {
     }
 
     @Override
-    public Token requestToken() {
+    public Token requestToken(RestTemplate template) {
         String authCode = findAuthCode();
         if (authCode == null) {
             throw new IllegalStateException("Can't find auth code");
         }
 
-        SFRestTemplate rt = new SFRestTemplate();
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", clientId);
@@ -46,7 +45,7 @@ public class WebAuthTokenProvider extends AbstractTokenProvider {
         params.add("redirect_uri", redirectUri);
         params.add("code", authCode);
 
-        return rt.postForObject(environment.getTokenURI(), params, Token.class);
+        return template.postForObject(environment.getTokenURI(), params, Token.class);
     }
 
     public String findAuthCode() {

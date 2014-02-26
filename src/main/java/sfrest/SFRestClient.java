@@ -1,21 +1,28 @@
 package sfrest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class SFRestClient {
+public class SFRestClient implements DisposableBean {
 
     private static final Logger logger = LoggerFactory.getLogger(SFRestClient.class);
+
+    private static final boolean httpClientPresent =
+            ClassUtils.isPresent("org.apache.http.impl.client.CloseableHttpClient", SFRestClient.class.getClassLoader());
 
     public static final String BASE_URI_APEX = "/services/apexrest";
     public static final String BASE_URI_REST = "/services/data/v28.0";
@@ -33,7 +40,8 @@ public class SFRestClient {
 
     private TokenProvider tokenProvider;
     private TokenStorage tokenStorage;
-    private SFRestTemplate template;
+    private RestTemplate template;
+    private HttpComponentsClientHttpRequestFactory httpClientRequestFactory;
 
     public TokenProvider getTokenProvider() {
         return tokenProvider;
@@ -43,7 +51,7 @@ public class SFRestClient {
         return tokenStorage;
     }
 
-    public SFRestTemplate getRestTemplate() {
+    public RestTemplate getRestTemplate() {
         return template;
     }
 
@@ -52,13 +60,14 @@ public class SFRestClient {
     }
 
     public SFRestClient(TokenProvider tokenProvider, TokenStorage tokenStorage) {
-        this(tokenProvider, tokenStorage, new SFRestTemplate());
-    }
-
-    public SFRestClient(TokenProvider tokenProvider, TokenStorage tokenStorage, SFRestTemplate template) {
         this.tokenProvider = tokenProvider;
         this.tokenStorage = tokenStorage;
-        this.template = template;
+        this.template = new SFRestTemplate();
+
+        if (httpClientPresent) {
+            httpClientRequestFactory = new HttpComponentsClientHttpRequestFactory();
+            this.template.setRequestFactory(httpClientRequestFactory);
+        }
     }
 
     public Environment getEnvironment() {
@@ -102,7 +111,7 @@ public class SFRestClient {
         String uri = BASE_URI_REST + "/sobjects/{type}/{id}";
 
         if (fields.length > 0) {
-            uri += "?fields=" + StringUtils.join(fields, ',');
+            uri += "?fields=" + StringUtils.arrayToCommaDelimitedString(fields);
         }
 
         return getMap(uri, HttpMethod.GET, null, type, id);
@@ -124,7 +133,7 @@ public class SFRestClient {
     public String getCurrentUsername() {
         Map<String, ?> values = getMap(BASE_URI_REST, HttpMethod.GET, null);
         String identity = (String) values.get("identity");
-        String userId = StringUtils.substringAfterLast(identity, "/");
+        String userId = identity.substring(identity.lastIndexOf('/') + 1);
 
         return (String) getSObject("User", userId, "Username").get("Username");
     }
@@ -160,7 +169,7 @@ public class SFRestClient {
         Token token = tokenStorage.getToken();
         if (token == null) {
             logger.debug("Token not found, requesting new token...");
-            token = tokenProvider.requestToken();
+            token = tokenProvider.requestToken(template);
             logger.debug("Got token: {}", token);
 
             tokenStorage.saveToken(token);
@@ -182,6 +191,13 @@ public class SFRestClient {
             logger.debug("Invalid token cleared successfully");
 
             throw e;
+        }
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        if (httpClientRequestFactory != null) {
+            httpClientRequestFactory.destroy();
         }
     }
 

@@ -28,7 +28,7 @@ public class UserPassTokenProviderTest {
 
     @Test
     public void testRequestToken() {
-        Token token = tokenProvider.requestToken();
+        Token token = requestToken();
         assertNotNull(token);
         assertNotNull(token.getId());
         assertNotNull(token.getIssueTime());
@@ -37,7 +37,6 @@ public class UserPassTokenProviderTest {
         assertNotNull(token.getAccessToken());
         assertNull(token.getRefreshToken());
         assertFalse(tokenProvider.isRefreshable(token));
-        System.out.println(token);
     }
 
     @Test
@@ -45,7 +44,7 @@ public class UserPassTokenProviderTest {
         thrown.expect(INVALID_ClIENT_ID);
 
         tokenProvider.setClientId("wrong");
-        tokenProvider.requestToken();
+        requestToken();
     }
 
     @Test
@@ -53,7 +52,7 @@ public class UserPassTokenProviderTest {
         thrown.expect(INVALID_CLIENT);
 
         tokenProvider.setClientSecret("wrong");
-        tokenProvider.requestToken();
+        requestToken();
     }
 
     @Test
@@ -61,7 +60,7 @@ public class UserPassTokenProviderTest {
         thrown.expect(INVALID_GRANT);
 
         tokenProvider.setUsername("wrong");
-        tokenProvider.requestToken();
+        requestToken();
     }
 
     @Test
@@ -69,7 +68,7 @@ public class UserPassTokenProviderTest {
         thrown.expect(INVALID_GRANT);
 
         tokenProvider.setPassword("wrong");
-        tokenProvider.requestToken();
+        requestToken();
     }
 
     @Test
@@ -77,6 +76,10 @@ public class UserPassTokenProviderTest {
         thrown.expect(INVALID_GRANT);
 
         tokenProvider.setSecurityToken("");
-        tokenProvider.requestToken();
+        requestToken();
+    }
+
+    private Token requestToken() {
+        return tokenProvider.requestToken(new SFRestTemplate());
     }
 }
