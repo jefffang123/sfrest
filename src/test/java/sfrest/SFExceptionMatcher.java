@@ -22,7 +22,7 @@ class SFExceptionMatcher extends TypeSafeMatcher<SFException> {
 
     @Override
     protected boolean matchesSafely(SFException item) {
-        return expectedErrorCode.equalsIgnoreCase(item.getErrorCode());
+        return expectedErrorCode.equals(item.getErrorCode());
     }
 
     @Override
