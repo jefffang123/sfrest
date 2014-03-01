@@ -37,6 +37,7 @@ public class UserPassTokenProviderTest {
         assertNotNull(token.getAccessToken());
         assertNull(token.getRefreshToken());
         assertFalse(tokenProvider.isRefreshable(token));
+        System.out.println(token);
     }
 
     @Test

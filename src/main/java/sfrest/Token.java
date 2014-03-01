@@ -1,10 +1,13 @@
 package sfrest;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.core.style.ToStringCreator;
 
 import java.io.Serializable;
 import java.util.Date;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Token implements Serializable {
 
     @JsonProperty("id")
@@ -24,12 +27,6 @@ public class Token implements Serializable {
 
     @JsonProperty("refresh_token")
     private String refreshToken;
-
-    @JsonProperty("scope")
-    private String scope;
-
-    @JsonProperty("token_type")
-    private String type;
 
     public String getId() {
         return id;
@@ -79,19 +76,13 @@ public class Token implements Serializable {
         this.refreshToken = refreshToken;
     }
 
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    @Override
+    public String toString() {
+        return new ToStringCreator(this)
+                .append("issueTime", issueTime)
+                .append("instanceUrl", instanceUrl)
+                .append("accessToken", accessToken)
+                .append("refreshToken", refreshToken)
+                .toString();
     }
 }
