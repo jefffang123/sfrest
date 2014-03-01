@@ -1,6 +1,5 @@
 package sfrest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -12,7 +11,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +22,7 @@ public class SFRestClient implements DisposableBean {
             ClassUtils.isPresent("org.apache.http.impl.client.CloseableHttpClient", SFRestClient.class.getClassLoader());
 
     public static final String BASE_URI_APEX = "/services/apexrest";
-    public static final String BASE_URI_REST = "/services/data/v28.0";
+    public static final String BASE_URI_REST = "/services/data/v29.0"; // TODO: auto-detect latest version
 
     private static final ParameterizedTypeReference<String> TYPE_STRING = new ParameterizedTypeReference<String>() {
     };
@@ -40,7 +38,7 @@ public class SFRestClient implements DisposableBean {
     private TokenProvider tokenProvider;
     private TokenStorage tokenStorage;
     private SFRestTemplate template;
-    private HttpComponentsClientHttpRequestFactory httpClientRequestFactory;
+    private HttpComponentsClientHttpRequestFactory httpClientRequestFactory; // Used only if http client library ( >= 4.3 ) is present.
 
     public TokenProvider getTokenProvider() {
         return tokenProvider;
@@ -73,25 +71,15 @@ public class SFRestClient implements DisposableBean {
         return tokenProvider.getEnvironment();
     }
 
-    public String getJsonString(String uri, HttpMethod method, Object requestBody, Object... uriVariables) {
-        if (method == HttpMethod.HEAD) {
-            try {
-                return new ObjectMapper().writeValueAsString(template.headForHeaders(uri, uriVariables));
-            } catch (IOException e) {
-                logger.error("Error occurs when converting headers into json string", e);
-                return null;
-            }
-        } else {
-            return execute(uri, method, requestBody, TYPE_STRING, uriVariables);
-        }
+    /**
+     * Returns response as json string.
+     */
+    public String getString(String uri, HttpMethod method, Object requestBody, Object... uriVariables) {
+        return execute(uri, method, requestBody, TYPE_STRING, uriVariables);
     }
 
     public Object getObject(String uri, HttpMethod method, Object requestBody, Object... uriVariables) {
-        if (method == HttpMethod.HEAD) {
-            return template.headForHeaders(uri, uriVariables);
-        } else {
-            return execute(uri, method, requestBody, TYPE_OBJECT, uriVariables);
-        }
+        return execute(uri, method, requestBody, TYPE_OBJECT, uriVariables);
     }
 
     public Map<String, ?> getMap(String uri, HttpMethod method, Object requestBody, Object... uriVariables) {

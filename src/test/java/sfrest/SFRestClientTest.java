@@ -1,8 +1,10 @@
 package sfrest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +13,17 @@ import static org.junit.Assert.*;
 public class SFRestClientTest {
 
     private SFRestClient restClient = new SFRestClient(new TestTokenProvider());
+
+    @Test
+    public void testGetEnv() {
+        assertSame(Environment.PRODUCTION, restClient.getEnvironment());
+    }
+
+    @Test
+    public void testGetString() {
+        String str = restClient.getString(SFRestClient.BASE_URI_REST, HttpMethod.GET, null);
+        verifyJsonString(str);
+    }
 
     @Test
     public void testGetList() {
@@ -105,5 +118,14 @@ public class SFRestClientTest {
         assertTrue(qResult.isDone());
         assertNull(qResult.getQueryLocator());
         assertTrue(size == totalSize);
+    }
+
+    private void verifyJsonString(String str) {
+        try {
+            System.out.println("Verifying json string: " + str);
+            new ObjectMapper().readValue(str, Object.class);
+        } catch (IOException e) {
+            fail("Not a json string: " + str);
+        }
     }
 }
