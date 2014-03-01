@@ -76,7 +76,15 @@ public class UserPassTokenProviderTest {
     public void testMissingSecurityToken() {
         thrown.expect(INVALID_GRANT);
 
-        tokenProvider.setSecurityToken("");
+        tokenProvider.setSecurityToken(null);
+        requestToken();
+    }
+
+    @Test
+    public void testWrongSecurityToken() {
+        thrown.expect(INVALID_GRANT);
+
+        tokenProvider.setSecurityToken("12345");
         requestToken();
     }
 

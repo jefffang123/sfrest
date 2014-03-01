@@ -11,7 +11,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,7 +39,7 @@ public class SFRestClient implements DisposableBean {
 
     private TokenProvider tokenProvider;
     private TokenStorage tokenStorage;
-    private RestTemplate template;
+    private SFRestTemplate template;
     private HttpComponentsClientHttpRequestFactory httpClientRequestFactory;
 
     public TokenProvider getTokenProvider() {
@@ -51,7 +50,7 @@ public class SFRestClient implements DisposableBean {
         return tokenStorage;
     }
 
-    public RestTemplate getRestTemplate() {
+    public SFRestTemplate getRestTemplate() {
         return template;
     }
 

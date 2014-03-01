@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import sfrest.AbstractTokenProvider;
+import sfrest.SFRestTemplate;
 import sfrest.Token;
 
 /**
@@ -32,7 +32,7 @@ public class WebAuthTokenProvider extends AbstractTokenProvider {
     }
 
     @Override
-    public Token requestToken(RestTemplate template) {
+    public Token requestToken(SFRestTemplate template) {
         String authCode = findAuthCode();
         if (authCode == null) {
             throw new IllegalStateException("Can't find auth code");

@@ -2,7 +2,6 @@ package sfrest;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Implementation of <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/intro_understanding_username_password_oauth_flow.htm">Username-Password OAuth Authentication Flow</a>.
@@ -38,7 +37,7 @@ public class UserPassTokenProvider extends AbstractTokenProvider {
     }
 
     @Override
-    public Token requestToken(RestTemplate template) {
+    public Token requestToken(SFRestTemplate template) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "password");
         params.add("client_id", clientId);

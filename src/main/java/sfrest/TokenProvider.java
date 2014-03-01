@@ -1,12 +1,10 @@
 package sfrest;
 
-import org.springframework.web.client.RestTemplate;
-
 public interface TokenProvider {
 
     Environment getEnvironment();
 
-    Token requestToken(RestTemplate template);
+    Token requestToken(SFRestTemplate template);
 
     boolean isRefreshable(Token token);
 
@@ -18,10 +16,10 @@ public interface TokenProvider {
      *
      * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/intro_understanding_refresh_token_oauth.htm">Understanding the OAuth Refresh Token Process</a>
      */
-    void refreshToken(RestTemplate template, Token token);
+    void refreshToken(SFRestTemplate template, Token token);
 
     /**
      * @see <a href="https://help.salesforce.com/HTViewHelpDoc?id=remoteaccess_revoke_token.htm">Revoking OAuth Tokens</a>
      */
-    void revokeToken(RestTemplate template, Token token, boolean includingRefreshToken);
+    void revokeToken(SFRestTemplate template, Token token, boolean includingRefreshToken);
 }

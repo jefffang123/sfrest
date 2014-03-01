@@ -15,9 +15,9 @@ import java.util.Map;
 /**
  * A <code>RestTemplate</code> that knows how to translate salesforce errors into corresponding Exceptions.
  */
-class SFRestTemplate extends RestTemplate {
+public class SFRestTemplate extends RestTemplate {
 
-    SFRestTemplate() {
+    public SFRestTemplate() {
         setErrorHandler(new SFResponseErrorHandler());
     }
 
