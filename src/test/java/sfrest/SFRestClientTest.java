@@ -26,15 +26,22 @@ public class SFRestClientTest {
     }
 
     @Test
-    public void testGetList() {
-        List<?> ret = restClient.getList("/services/data", HttpMethod.GET, null);
-        assertFalse(ret.isEmpty());
+    public void testGetObject() {
+        Object obj = restClient.getObject(SFRestClient.BASE_URI_REST, HttpMethod.GET, null);
+        assertNotNull(obj);
+        assertTrue(obj instanceof Map);
     }
 
     @Test
     public void testGetMap() {
         Map<String, ?> ret = restClient.getMap(SFRestClient.BASE_URI_REST + "/sobjects/Lead/describe", HttpMethod.GET, null);
         assertEquals("Lead", ret.get("name"));
+    }
+
+    @Test
+    public void testGetList() {
+        List<?> ret = restClient.getList("/services/data", HttpMethod.GET, null);
+        assertFalse(ret.isEmpty());
     }
 
     @Test
