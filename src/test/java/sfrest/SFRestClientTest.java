@@ -101,36 +101,30 @@ public class SFRestClientTest {
 
     @Test
     public void testSimpleQuery() {
-        String soql = "SELECT Id, Name FROM Account LIMIT 10"; // Put in "Limit" to make sure no cursor involved.
-        QueryResult qResult = restClient.query(soql);
-        assertTrue(qResult.getTotalSize() > 0);
-        assertTrue(qResult.isDone());
-        assertTrue(qResult.getTotalSize() == qResult.getRecords().size());
-        assertNull(qResult.getQueryLocator());
+        String soql = "SELECT Id, Name FROM Account LIMIT 5"; // Put in "Limit" to make sure no cursor involved.
+        assertFalse(restClient.query(soql).isEmpty());
     }
 
     @Test
     public void testQueryWithCursor() {
-        String soql = "SELECT LoginTime, SourceIp, Status FROM LoginHistory";
+        String soql = "SELECT LoginTime, SourceIp, Status FROM LoginHistory LIMIT 5000";
 
-        QueryResult qResult = restClient.query(soql);
-        int totalSize = qResult.getTotalSize();
-        int size = qResult.getRecords().size();
-
-        while (!qResult.isDone()) {
-            assertNotNull(qResult.getQueryLocator());
-            qResult = restClient.queryMore(qResult.getQueryLocator());
+        Query query = new Query(soql);
+        QueryResult qResult;
+        int size = 0;
+        do {
+            qResult = restClient.query(query);
             size += qResult.getRecords().size();
-        }
+        } while (!qResult.isDone());
 
         assertTrue(qResult.isDone());
-        assertNull(qResult.getQueryLocator());
-        assertTrue(size == totalSize);
+        assertTrue(size == qResult.getTotalSize());
+        assertNull(qResult.getQuery().getNextUri());
     }
 
     @Test
-    public void testGetCurrentUsername() {
-        assertEquals("sanlyfang@gmail.com", restClient.getCurrentUsername());
+    public void testGetCurrentUser() {
+        assertEquals("sanlyfang@gmail.com", restClient.getCurrentUser().get("Username"));
     }
 
     private void verifyJsonString(String str) {

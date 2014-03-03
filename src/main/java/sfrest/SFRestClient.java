@@ -117,51 +117,38 @@ public class SFRestClient implements DisposableBean {
         return getMap(uri, HttpMethod.GET, null, type, id);
     }
 
-    public QueryResult query(String soql) {
-        logger.debug("Executing Query: {}", soql);
-
-        return loadQueryResult(BASE_URI_REST + "/query/?q=" + soql);
+    public List<Map<String, ?>> query(String soql) {
+        return query(new Query(soql)).getRecords();
     }
 
-    public QueryResult queryMore(QueryLocator queryLocator) {
-        return loadQueryResult(queryLocator.getKey());
-    }
+    public QueryResult query(Query query) {
+        String uri = query.getNextUri();
+        if (uri == null) {
+            uri = BASE_URI_REST + "/query/?q=" + query.getSoql();
+        }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private QueryResult loadQueryResult(String queryUri) {
-        Map<String, ?> ret = getMap(queryUri, HttpMethod.GET, null);
+        Map<String, ?> ret = getMap(uri, HttpMethod.GET, null);
 
         QueryResult qResult = new QueryResult();
         qResult.setTotalSize((Integer) ret.get("totalSize"));
         qResult.setDone((Boolean) ret.get("done"));
         qResult.setRecords((List) ret.get("records"));
 
-        if (!qResult.isDone()) {
-            QueryLocator qLocator = new QueryLocator((String) ret.get("nextRecordsUrl"));
-            qResult.setQueryLocator(qLocator);
-        }
+        query.setNextUri(!qResult.isDone() ? (String) ret.get("nextRecordsUrl") : null);
+        qResult.setQuery(query);
 
         return qResult;
     }
 
-    public String getCurrentUsername() {
-        Map<String, ?> values = getMap(BASE_URI_REST, HttpMethod.GET, null);
-        String identity = (String) values.get("identity");
-        String userId = identity.substring(identity.lastIndexOf('/') + 1);
+    public Map<String, ?> getCurrentUser() {
+        String id = getToken().getId();
+        String userId = id.substring(id.lastIndexOf('/') + 1);
 
-        return (String) getSObject("User", userId, "Username").get("Username");
+        return getSObject("User", userId);
     }
 
     public <T> T execute(String uri, HttpMethod method, Object requestBody, ParameterizedTypeReference<T> responseType, Object... uriVariables) {
-        Token token = tokenStorage.getToken();
-        if (token == null) {
-            logger.debug("Token not found, requesting new token...");
-            token = tokenProvider.requestToken(template);
-            logger.debug("Got token: {}", token);
-
-            tokenStorage.saveToken(token);
-            logger.debug("Token saved successfully");
-        }
+        Token token = getToken();
 
         if (!uri.startsWith("http")) {
             uri = token.getInstanceUrl() + (uri.startsWith("/") ? "" : "/") + uri;
@@ -179,6 +166,20 @@ public class SFRestClient implements DisposableBean {
 
             throw e;
         }
+    }
+
+    private Token getToken() {
+        Token token = tokenStorage.getToken();
+        if (token == null) {
+            logger.debug("Token not found, requesting new token...");
+            token = tokenProvider.requestToken(template);
+            logger.debug("Got token: {}", token);
+
+            tokenStorage.saveToken(token);
+            logger.debug("Token saved successfully");
+        }
+
+        return token;
     }
 
     @Override

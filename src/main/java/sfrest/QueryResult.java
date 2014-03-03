@@ -8,7 +8,7 @@ public class QueryResult {
     private int totalSize;
     private boolean done;
     private List<Map<String, ?>> records;
-    private QueryLocator queryLocator;
+    private Query query;
 
     public int getTotalSize() {
         return totalSize;
@@ -34,12 +34,11 @@ public class QueryResult {
         this.records = records;
     }
 
-    public QueryLocator getQueryLocator() {
-        return queryLocator;
+    public Query getQuery() {
+        return query;
     }
 
-    public void setQueryLocator(QueryLocator queryLocator) {
-        this.queryLocator = queryLocator;
+    public void setQuery(Query query) {
+        this.query = query;
     }
-
 }

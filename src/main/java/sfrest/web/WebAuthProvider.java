@@ -27,7 +27,7 @@ public class WebAuthProvider implements AuthenticationProvider {
         logger.debug("Processing authentication: {}", authentication);
 
         if (client.isLoggedIn()) {
-            return new UsernamePasswordAuthenticationToken(client.getCurrentUsername(),
+            return new UsernamePasswordAuthenticationToken(client.getCurrentUser().get("Username"),
                     client.getTokenStorage().getToken(),
                     Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
         } else {
