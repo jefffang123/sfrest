@@ -39,6 +39,13 @@ public class SFRestClientTest {
     }
 
     @Test
+    public void testGetMapList() {
+        List<Map<String, ?>> ret = restClient.getMapList("/services/data", HttpMethod.GET, null);
+        assertFalse(ret.isEmpty());
+        assertTrue(ret.get(0).containsKey("url"));
+    }
+
+    @Test
     public void testGetList() {
         List<?> ret = restClient.getList("/services/data", HttpMethod.GET, null);
         assertFalse(ret.isEmpty());

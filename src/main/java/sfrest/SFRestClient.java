@@ -152,7 +152,7 @@ public class SFRestClient implements DisposableBean {
         return qResult;
     }
 
-    private <T> T execute(String uri, HttpMethod method, Object requestBody, ParameterizedTypeReference<T> responseType, Object... uriVariables) {
+    public <T> T execute(String uri, HttpMethod method, Object requestBody, ParameterizedTypeReference<T> responseType, Object... uriVariables) {
         Token token = tokenStorage.getToken();
         if (token == null) {
             logger.debug("Token not found, requesting new token...");
