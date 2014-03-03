@@ -59,6 +59,33 @@ public class SFRestClientTest {
     }
 
     @Test
+    public void testListSObjects() {
+        Map<String, ?> ret = restClient.listSObjects();
+
+        assertTrue(ret.containsKey("encoding"));
+        assertTrue(ret.containsKey("maxBatchSize"));
+        List sobjects = (List) ret.get("sobjects");
+        assertFalse(sobjects.isEmpty());
+    }
+
+    @Test
+    public void testGetSObjectMetadataBasic() {
+        String type = "Account";
+        Map<String, ?> ret = restClient.getSObjectMetadata(type, false);
+        assertTrue(ret.containsKey("recentItems"));
+        Map metadata = (Map) ret.get("objectDescribe");
+        assertEquals(type, metadata.get("name"));
+    }
+
+    @Test
+    public void testGetSObjectMetadataDetails() {
+        String type = "Lead";
+        Map<String, ?> ret = restClient.getSObjectMetadata(type, true);
+        assertEquals(type, ret.get("name"));
+        assertFalse(((List) ret.get("fields")).isEmpty());
+    }
+
+    @Test
     public void testGetSObjectWithoutFields() {
         Map<String, ?> sobject = restClient.getSObject("User", "00590000001eMZoAAM");
         assertEquals("sanlyfang@gmail.com", sobject.get("Username"));
@@ -73,44 +100,12 @@ public class SFRestClientTest {
     }
 
     @Test
-    public void testListSObjects() {
-        Map<String, ?> ret = restClient.listSObjects();
-        @SuppressWarnings("rawtypes")
-        List sobjects = (List) ret.get("sobjects");
-        assertTrue(sobjects.size() > 0);
-    }
-
-    @Test
-    public void testGetSObjectMetadataBasic() {
-        String type = "Account";
-        Map<String, ?> ret = restClient.getSObjectMetadata(type, false);
-        @SuppressWarnings("unchecked")
-        Map<String, ?> metadata = (Map<String, ?>) ret.get("objectDescribe");
-        assertEquals(type, metadata.get("name"));
-        assertNotNull(ret.get("recentItems"));
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Test
-    public void testGetSObjectMetadataDetails() {
-        String type = "Lead";
-        Map<String, ?> ret = restClient.getSObjectMetadata(type, true);
-        assertEquals(type, ret.get("name"));
-        assertTrue(((List) ret.get("fields")).size() > 0);
-    }
-
-    @Test
-    public void testGetCurrentUsername() {
-        assertEquals("sanlyfang@gmail.com", restClient.getCurrentUsername());
-    }
-
-    @Test
     public void testSimpleQuery() {
         String soql = "SELECT Id, Name FROM Account LIMIT 10"; // Put in "Limit" to make sure no cursor involved.
         QueryResult qResult = restClient.query(soql);
         assertTrue(qResult.getTotalSize() > 0);
         assertTrue(qResult.isDone());
-        assertEquals(qResult.getTotalSize(), qResult.getRecords().size());
+        assertTrue(qResult.getTotalSize() == qResult.getRecords().size());
         assertNull(qResult.getQueryLocator());
     }
 
@@ -123,7 +118,6 @@ public class SFRestClientTest {
         int size = qResult.getRecords().size();
 
         while (!qResult.isDone()) {
-            assertTrue(qResult.getRecords().size() == 2000);
             assertNotNull(qResult.getQueryLocator());
             qResult = restClient.queryMore(qResult.getQueryLocator());
             size += qResult.getRecords().size();
@@ -132,6 +126,11 @@ public class SFRestClientTest {
         assertTrue(qResult.isDone());
         assertNull(qResult.getQueryLocator());
         assertTrue(size == totalSize);
+    }
+
+    @Test
+    public void testGetCurrentUsername() {
+        assertEquals("sanlyfang@gmail.com", restClient.getCurrentUsername());
     }
 
     private void verifyJsonString(String str) {

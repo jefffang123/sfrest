@@ -94,16 +94,6 @@ public class SFRestClient implements DisposableBean {
         return execute(uri, method, requestBody, TYPE_LIST, uriVariables);
     }
 
-    public Map<String, ?> getSObject(String type, String id, String... fields) {
-        String uri = BASE_URI_REST + "/sobjects/{type}/{id}";
-
-        if (fields.length > 0) {
-            uri += "?fields=" + StringUtils.arrayToCommaDelimitedString(fields);
-        }
-
-        return getMap(uri, HttpMethod.GET, null, type, id);
-    }
-
     public Map<String, ?> listSObjects() {
         return getMap(BASE_URI_REST + "/sobjects", HttpMethod.GET, null);
     }
@@ -117,12 +107,14 @@ public class SFRestClient implements DisposableBean {
         return getMap(uri, HttpMethod.GET, null, type);
     }
 
-    public String getCurrentUsername() {
-        Map<String, ?> values = getMap(BASE_URI_REST, HttpMethod.GET, null);
-        String identity = (String) values.get("identity");
-        String userId = identity.substring(identity.lastIndexOf('/') + 1);
+    public Map<String, ?> getSObject(String type, String id, String... fields) {
+        String uri = BASE_URI_REST + "/sobjects/{type}/{id}";
 
-        return (String) getSObject("User", userId, "Username").get("Username");
+        if (fields.length > 0) {
+            uri += "?fields=" + StringUtils.arrayToCommaDelimitedString(fields);
+        }
+
+        return getMap(uri, HttpMethod.GET, null, type, id);
     }
 
     public QueryResult query(String soql) {
@@ -150,6 +142,14 @@ public class SFRestClient implements DisposableBean {
         }
 
         return qResult;
+    }
+
+    public String getCurrentUsername() {
+        Map<String, ?> values = getMap(BASE_URI_REST, HttpMethod.GET, null);
+        String identity = (String) values.get("identity");
+        String userId = identity.substring(identity.lastIndexOf('/') + 1);
+
+        return (String) getSObject("User", userId, "Username").get("Username");
     }
 
     public <T> T execute(String uri, HttpMethod method, Object requestBody, ParameterizedTypeReference<T> responseType, Object... uriVariables) {
