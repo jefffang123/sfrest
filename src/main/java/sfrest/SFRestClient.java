@@ -67,10 +67,6 @@ public class SFRestClient implements DisposableBean {
         }
     }
 
-    public Environment getEnvironment() {
-        return tokenProvider.getEnvironment();
-    }
-
     /**
      * Returns response as json string.
      */
@@ -138,6 +134,10 @@ public class SFRestClient implements DisposableBean {
         qResult.setQuery(query);
 
         return qResult;
+    }
+
+    public Environment getEnvironment() {
+        return tokenProvider.getEnvironment();
     }
 
     public Map<String, ?> getCurrentUser() {

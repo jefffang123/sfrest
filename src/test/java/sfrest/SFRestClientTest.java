@@ -15,11 +15,6 @@ public class SFRestClientTest {
     private SFRestClient restClient = new SFRestClient(new TestTokenProvider());
 
     @Test
-    public void testGetEnv() {
-        assertSame(Environment.PRODUCTION, restClient.getEnvironment());
-    }
-
-    @Test
     public void testGetString() {
         String str = restClient.getString(SFRestClient.BASE_URI_REST, HttpMethod.GET, null);
         verifyJsonString(str);
@@ -120,6 +115,11 @@ public class SFRestClientTest {
         assertTrue(qResult.isDone());
         assertTrue(size == qResult.getTotalSize());
         assertNull(qResult.getQuery().getNextUri());
+    }
+
+    @Test
+    public void testGetEnv() {
+        assertSame(Environment.PRODUCTION, restClient.getEnvironment());
     }
 
     @Test
